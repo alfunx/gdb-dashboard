@@ -317,6 +317,9 @@ def format_value(value, compact=None):
         out = out[0:R.max_value_length] + ansi(R.value_truncation_string, R.style_critical)
     return out
 
+def format_path(path):
+    return re.sub(r"^" + re.escape(os.path.expanduser('~')), '~', path)
+
 # XXX parsing the output of `info breakpoints` is apparently the best option
 # right now, see: https://sourceware.org/bugzilla/show_bug.cgi?id=18385
 # XXX GDB version 7.11 (quire recent) does not have the pending field, so
@@ -1705,7 +1708,7 @@ Optionally list the frame arguments and locals too.'''
             info += ' in {}'.format(name)
         sal = frame.find_sal()
         if sal and sal.symtab:
-            file_name = ansi(sal.symtab.filename, style)
+            file_name = ansi(format_path(sal.symtab.filename), style)
             file_line = ansi(str(sal.line), style)
             info += ' at {}:{}'.format(file_name, file_line)
         return info
@@ -2210,7 +2213,7 @@ class Breakpoints(Dashboard.Module):
                         file_name = address.get('file_name')
                         file_line = address.get('file_line')
                         if file_name and file_line:
-                            file_name = ansi(file_name, style)
+                            file_name = ansi(format_path(file_name), style)
                             file_line = ansi(file_line, style)
                             line += ' in {}:{}'.format(file_name, file_line)
                     elif i > 0:
@@ -2223,7 +2226,7 @@ class Breakpoints(Dashboard.Module):
                         file_name = address.get('file_name')
                         file_line = address.get('file_line')
                         if file_name and file_line:
-                            file_name = ansi(file_name, sub_style)
+                            file_name = ansi(format_path(file_name), sub_style)
                             file_line = ansi(file_line, sub_style)
                             sub_line += ' in {}:{}'.format(file_name, file_line)
                         sub_lines += [sub_line]
